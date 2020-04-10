@@ -11,6 +11,8 @@ var (
 	// Curve is a KoblitzCurve which implements secp256k1.
 	Curve = btcec.S256()
 	// One holds a big integer of 1
+	Zero = new(big.Int).SetInt64(0)
+	// One holds a big integer of 1
 	One = new(big.Int).SetInt64(1)
 	// Two holds a big integer of 2
 	Two = new(big.Int).SetInt64(2)
@@ -23,12 +25,6 @@ var (
 	// N2 holds a big integer of N-2
 	N2 = new(big.Int).Sub(Curve.N, Two)
 )
-
-func intToByte(i *big.Int) []byte {
-	b1, b2 := [32]byte{}, i.Bytes()
-	copy(b1[32-len(b2):], b2)
-	return b1[:]
-}
 
 // Marshal converts a point into the form specified in section 2.3.3 of the
 // SEC 1 standard.

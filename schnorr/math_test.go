@@ -17,12 +17,12 @@ func TestGetK0(t *testing.T)  {
 	copy(d32[:], d)
 	copy(P33[:], P)
 
-	k0 := getPrivateK0(d32, message)
-	Rx := getPublicRx(P33, message)
+	k0 := GetPrivateK0(d32, message)
+	Rx := GetPublicRx(P33, message)
 
 	Rx1, _ := Curve.ScalarBaseMult(k0[:])
 
-	if !bytes.Equal(Rx[:], Rx1.Bytes()) {
+	if !bytes.Equal(Rx[:], intToByte(Rx1)) {
 		panic("R 不相等")
 	}
 }

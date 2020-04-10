@@ -1,8 +1,8 @@
 package schnorr
 
 func checkPublicInArray(privateKey *PrivateKey, publicKeys []*PublicKey) bool{
-	PIx, PIy := Curve.ScalarBaseMult(privateKey.d[:])
-	RIx, RIy := Curve.ScalarBaseMult(privateKey.k0[:])
+	PIx, PIy := Curve.ScalarBaseMult(privateKey.D[:])
+	RIx, RIy := Curve.ScalarBaseMult(privateKey.K0[:])
 
 	for _, publicKey := range publicKeys {
 		Px, Py := Unmarshal(Curve, publicKey.P[:])

@@ -3,7 +3,6 @@ package schnorr
 import (
 	"bytes"
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"testing"
 )
@@ -42,7 +41,7 @@ func TestSign(t *testing.T)  {
 	copy(k032[:], k0)
 	copy(P33[:], P)
 	copy(R33[:], R)
-	privateKey := &PrivateKey{d:d32, k0:k032}
+	privateKey := &PrivateKey{D:d32, K0:k032}
 	publicKey := &PublicKey{P:P33, R:R33}
 
 	Rx, _, s, err := Sign(message, privateKey, []*PublicKey{publicKey})
@@ -51,8 +50,8 @@ func TestSign(t *testing.T)  {
 	}
 
 	var signatureToVerify64 [64]byte
-	copy(signatureToVerify64[:32], Rx.Bytes())
-	copy(signatureToVerify64[32:], s.Bytes())
+	copy(signatureToVerify64[:32], intToByte(Rx))
+	copy(signatureToVerify64[32:], intToByte(s))
 
 	ret, err := Verify(publicKey.P, message, signatureToVerify64)
 	if err != nil {
@@ -62,7 +61,7 @@ func TestSign(t *testing.T)  {
 		panic("验证失败")
 	}
 
-	if bytes.Equal(Rx.Bytes(), publicKey.R[:]) {
+	if bytes.Equal(intToByte(Rx), publicKey.R[:]) {
 		panic("Rx 错误")
 	}
 }
@@ -78,12 +77,12 @@ func TestAggregateSignatures(t *testing.T) {
 
 	var privateKeys []*PrivateKey
 	var publicKeys []*PublicKey
-	PubX, PubY := new(big.Int).SetInt64(0), new(big.Int).SetInt64(0)
-	for _, privkD := range privkDs[1:3]  {
+	PubX, PubY := Zero, Zero
+	for _, privkD := range privkDs[:]  {
 		d, _ := hex.DecodeString(privkD)
 		var d32 [32]byte
 		copy(d32[:], d)
-		k0 := getPrivateK0(d32, message)
+		k0 := GetPrivateK0(d32, message)
 
 		Px, Py := Curve.ScalarBaseMult(d[:])
 		PubX, PubY = Curve.Add(PubX, PubY, Px, Py)
@@ -96,7 +95,7 @@ func TestAggregateSignatures(t *testing.T) {
 		copy(P33[:], P)
 		copy(R33[:], R)
 
-		privateKeys = append(privateKeys, &PrivateKey{d:d32, k0:k0})
+		privateKeys = append(privateKeys, &PrivateKey{D:d32, K0:k0})
 		publicKeys = append(publicKeys, &PublicKey{P:P33, R:R33})
 	}
 
@@ -107,7 +106,6 @@ func TestAggregateSignatures(t *testing.T) {
 	var sign [64]byte
 	var err error
 	for i, privateKey := range privateKeys {
-		fmt.Printf("privateKey.k0 = %x\n", privateKey.k0)
 		sign, err = AppendSignature(sign, message, privateKey, publicKeys, i)
 		if err != nil {
 			panic(err)

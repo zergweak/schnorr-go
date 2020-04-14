@@ -129,16 +129,12 @@ func MultiVerify(publicKey [][33]byte, message []byte, signature [64]byte) (bool
 func VerifySignInput(publicKeysSigned []*PublicKey, publicKeys []*PublicKey, message []byte, signInput [64]byte) (bool, error) {
 	pub := aggregationPublicKey(publicKeys)
 	Px, Py := Unmarshal(Curve, pub.P[:])
-	Rx, _ := Unmarshal(Curve, pub.R[:])
+	Rx, Ry := Unmarshal(Curve, pub.R[:])
 
 	pubSigned := aggregationPublicKey(publicKeysSigned)
 	pubSignedPx, pubSignedPy := Unmarshal(Curve, pubSigned.P[:])
-	pubSignedRx, _ := Unmarshal(Curve, pubSigned.R[:])
+	pubSignedRx, pubSignedRy := Unmarshal(Curve, pubSigned.R[:])
 
-
-	if Px == nil || Py == nil || !Curve.IsOnCurve(Px, Py) {
-		return false, errors.New("signature verification failed")
-	}
 	r := new(big.Int).SetBytes(signInput[:32])
 	if r.Cmp(Curve.P) >= 0 {
 		return false, errors.New("r is larger than or equal to field size")
@@ -155,8 +151,22 @@ func VerifySignInput(publicKeysSigned []*PublicKey, publicKeys []*PublicKey, mes
 	ePx, ePy := Curve.ScalarMult(pubSignedPx, pubSignedPy, intToByte(e))
 	ePy.Sub(Curve.P, ePy)
 	Rx1, Ry1 := Curve.Add(sGx, sGy, ePx, ePy)
-	if (Rx1.Sign() == 0 && Ry1.Sign() == 0) || pubSignedRx.Cmp(r) != 0/*|| big.Jacobi(Ry1, Curve.P) != 1*/ || Rx1.Cmp(r) != 0 {
-		return false, errors.New("signature verification failed")
+	if Rx1.Sign() == 0 && Ry1.Sign() == 0 {
+		return false, errors.New("signature verification failed : Rx1, Rx1 are zero")
+	}
+	if pubSignedRx.Cmp(r) != 0 {
+		return false, errors.New("signature verification failed : pubSignedRx is not equal r")
+	}
+	if Rx1.Cmp(r) != 0 {
+		return false, errors.New("signature verification failed : Rx1 is not equal r")
+	}
+	// 所有的k都根据Ry是否jacobi做过调整, 因此通过s计算出的Ry1也是做过调整的。
+	// big.Jacobi(Ry, Curve.P) != 1 成立是，Ry1 和 pubSignedRy 是反的。
+	if big.Jacobi(Ry, Curve.P) != 1 {
+		Ry1 = new(big.Int).Sub(Curve.P, Ry1)
+	}
+	if Ry1.Cmp(pubSignedRy) != 0 {
+		return false, errors.New("signature verification failed : Ry1 is not equal pubSignedRy")
 	}
 	return true, nil
 }

@@ -33,6 +33,13 @@ func main()  {
 		if err != nil {
 			panic(err)
 		}
+		ret, err = multisign.VerifySignInput(publicKeys[:i+1], publicKeys, message, sign)
+		if err != nil {
+			panic(err)
+		}
+		if !ret {
+			panic("验证签名失败")
+		}
 	}
 
 	//所有人都签名完了，验证签名

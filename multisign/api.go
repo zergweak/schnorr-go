@@ -27,6 +27,28 @@ func AppendSignature(signInput [64]byte, message []byte, privateKey [32]byte, pu
 	return schnorr.AppendSignature(signInput, message, privKey, pubKeys, index)
 }
 
+func Sign(message []byte, privateKey [32]byte, publicKeys [][33]byte) (signOutput [64]byte, err error){
+	k0 := schnorr.GetPrivateK0(privateKey, message)
+	privKey := &schnorr.PrivateKey{D:privateKey, K0:k0}
+
+	if len(publicKeys) == 0 {
+		return signOutput, errors.New("invalid publicKeys")
+	}
+	var pubKeys []*schnorr.PublicKey
+	for _, publicKey := range publicKeys {
+		R := schnorr.GetPublicR(publicKey, message)
+		pubKey := &schnorr.PublicKey{P:publicKey, R:R}
+		pubKeys = append(pubKeys, pubKey)
+	}
+	Rix, _, s, err := schnorr.Sign(message, privKey, pubKeys)
+	if err != nil {
+		return signOutput, err
+	}
+	copy(signOutput[:32], schnorr.IntToByte(Rix))
+	copy(signOutput[32:], schnorr.IntToByte(s))
+	return signOutput, nil
+}
+
 //Verify
 func Verify(publicKey [33]byte, message []byte, signature [64]byte) (bool, error) {
 	return schnorr.Verify(publicKey, message, signature)

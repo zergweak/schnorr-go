@@ -49,8 +49,8 @@ func AppendSignature(signInput [64]byte, message []byte, privateKey *PrivateKey,
 		s = s.Add(s, sSigned)
 		s = s.Mod(s, Curve.N)
 	}
-	copy(signOutput[:32], intToByte(Rix))
-	copy(signOutput[32:], intToByte(s))
+	copy(signOutput[:32], IntToByte(Rix))
+	copy(signOutput[32:], IntToByte(s))
 	return  signOutput, nil
 }
 
@@ -75,7 +75,7 @@ func Sign(message []byte, privateKey *PrivateKey, publicKeys []*PublicKey) (RIx,
 	k0 := new(big.Int).SetBytes(privateKey.K0[:])
 	k := getK(Ry, k0)
 
-	rX := intToByte(Rx)
+	rX := IntToByte(Rx)
 	e := getE(Px, Py, rX, message)
 	// s = k + de
 	priKey := new(big.Int).SetBytes(privateKey.D[:])
@@ -102,10 +102,10 @@ func Verify(publicKey [33]byte, message []byte, signature [64]byte) (bool, error
 		return false, errors.New("s is larger than or equal to curve order")
 	}
 
-	e := getE(Px, Py, intToByte(r), message)
-	sGx, sGy := Curve.ScalarBaseMult(intToByte(s))
+	e := getE(Px, Py, IntToByte(r), message)
+	sGx, sGy := Curve.ScalarBaseMult(IntToByte(s))
 	// e.Sub(Curve.N, e)
-	ePx, ePy := Curve.ScalarMult(Px, Py, intToByte(e))
+	ePx, ePy := Curve.ScalarMult(Px, Py, IntToByte(e))
 	ePy.Sub(Curve.P, ePy)
 	Rx, Ry := Curve.Add(sGx, sGy, ePx, ePy)
 
@@ -144,11 +144,11 @@ func VerifySignInput(publicKeysSigned []*PublicKey, publicKeys []*PublicKey, mes
 		return false, errors.New("s is larger than or equal to curve order")
 	}
 
-	rX := intToByte(Rx)
+	rX := IntToByte(Rx)
 	e := getE(Px, Py, rX, message)
-	sGx, sGy := Curve.ScalarBaseMult(intToByte(s))
+	sGx, sGy := Curve.ScalarBaseMult(IntToByte(s))
 	// e.Sub(Curve.N, e)
-	ePx, ePy := Curve.ScalarMult(pubSignedPx, pubSignedPy, intToByte(e))
+	ePx, ePy := Curve.ScalarMult(pubSignedPx, pubSignedPy, IntToByte(e))
 	ePy.Sub(Curve.P, ePy)
 	Rx1, Ry1 := Curve.Add(sGx, sGy, ePx, ePy)
 	if Rx1.Sign() == 0 && Ry1.Sign() == 0 {

@@ -7,7 +7,7 @@ import (
 	"math/big"
 )
 
-func intToByte(i *big.Int) []byte {
+func IntToByte(i *big.Int) []byte {
 	b1, b2 := [32]byte{}, i.Bytes()
 	copy(b1[32-len(b2):], b2)
 	return b1[:]
@@ -68,22 +68,22 @@ func aggregationPubKey(publicKeys [][33]byte) (pubkey [33]byte) {
 //用P计算Rx
 func GetPublicRx(P [33]byte, message []byte) [32]byte {
 	Px, Py := Unmarshal(Curve, P[:])
-	ilNum := computChildOffset(intToByte(Px), intToByte(Py), message)
+	ilNum := computChildOffset(IntToByte(Px), IntToByte(Py), message)
 
-	ilx, ily := Curve.ScalarBaseMult(intToByte(ilNum))
+	ilx, ily := Curve.ScalarBaseMult(IntToByte(ilNum))
 	Rx, _ := Curve.Add(ilx, ily, Px, Py)
 
 	var ret [32]byte
-	copy(ret[:], intToByte(Rx))
+	copy(ret[:], IntToByte(Rx))
 	return ret
 }
 
 //用P计算R
 func GetPublicR(P [33]byte, message []byte) [33]byte {
 	Px, Py := Unmarshal(Curve, P[:])
-	ilNum := computChildOffset(intToByte(Px), intToByte(Py), message)
+	ilNum := computChildOffset(IntToByte(Px), IntToByte(Py), message)
 
-	ilx, ily := Curve.ScalarBaseMult(intToByte(ilNum))
+	ilx, ily := Curve.ScalarBaseMult(IntToByte(ilNum))
 	Rx, Ry := Curve.Add(ilx, ily, Px, Py)
 
 	R := Marshal(Curve, Rx, Ry)
@@ -95,14 +95,14 @@ func GetPublicR(P [33]byte, message []byte) [33]byte {
 //用d计算k0
 func GetPrivateK0(d [32]byte, message []byte) [32]byte {
 	Px, Py := Curve.ScalarBaseMult(d[:])
-	ilNum := computChildOffset(intToByte(Px), intToByte(Py), message)
+	ilNum := computChildOffset(IntToByte(Px), IntToByte(Py), message)
 
 	k0Num := new(big.Int).SetBytes(d[:])
 	k0Num = k0Num.Add(k0Num, ilNum)
 	k0Num = k0Num.Mod(k0Num, Curve.N)
 
 	var k0 [32]byte
-	copy(k0[:], intToByte(k0Num))
+	copy(k0[:], IntToByte(k0Num))
 	return k0
 }
 

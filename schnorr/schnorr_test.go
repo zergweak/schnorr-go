@@ -50,8 +50,8 @@ func TestSign(t *testing.T)  {
 	}
 
 	var signatureToVerify64 [64]byte
-	copy(signatureToVerify64[:32], intToByte(Rx))
-	copy(signatureToVerify64[32:], intToByte(s))
+	copy(signatureToVerify64[:32], IntToByte(Rx))
+	copy(signatureToVerify64[32:], IntToByte(s))
 
 	ret, err := Verify(publicKey.P, message, signatureToVerify64)
 	if err != nil {
@@ -61,7 +61,7 @@ func TestSign(t *testing.T)  {
 		panic("验证失败")
 	}
 
-	if bytes.Equal(intToByte(Rx), publicKey.R[:]) {
+	if bytes.Equal(IntToByte(Rx), publicKey.R[:]) {
 		panic("Rx 错误")
 	}
 }

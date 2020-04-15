@@ -22,7 +22,7 @@ func TestGetK0(t *testing.T)  {
 
 	Rx1, _ := Curve.ScalarBaseMult(k0[:])
 
-	if !bytes.Equal(Rx[:], intToByte(Rx1)) {
+	if !bytes.Equal(Rx[:], IntToByte(Rx1)) {
 		panic("R 不相等")
 	}
 }

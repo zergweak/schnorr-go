@@ -1,7 +1,7 @@
 # schnorr签名算法
 
 ### 初始化
-P: 有限域的阶 <br>
+p: 有限域的阶 <br>
 G: 椭圆曲线基点 <br>
 N: 椭圆曲线的阶 <br>
 
@@ -27,7 +27,7 @@ P = d*G, P就是用户公钥  <br>
 计算 X = s*G <br>
 计算 Y = e*P <br>
 计算 R' = X - Y = s*G - e*P, 其中Rx', Ry'为R'的坐标 <br>
-如果 Rx' 等于 Rx, 且Ry'是P的二次剩余, 则验证成功 <br>
+如果 Rx' 等于 Rx, 且Ry'是p的二次剩余, 则验证成功 <br>
 
 #### 公式
 ##### getK0(msg, d)
@@ -39,7 +39,7 @@ k0可以是随机数，也可以由 msg和d分散计算. <br>
 计算 k0 = (d + h) mod N <br>
 
 ##### getK(Ry, k0)
-如果Ry是P的二次剩余, k = k0 <br>
+如果Ry是p的二次剩余, k = k0 <br>
 否则 k = N - k0  <br>
 
 ##### getE(Px, Py, Rx, msg)
@@ -51,6 +51,6 @@ R = k0*G        <br>
 由于 k = k0 或者 k = N - k0 <br>
 所以 R' = R 或者 R' = -R <br>
 所以 Rx' = Rx <br>
-由于 Ry是P的二次剩余时, k = k0, 否则 k = N - k0 <br>
-所以 Ry' 总是P的二次剩余 <br>
+由于 Ry是p的二次剩余时, k = k0, 否则 k = N - k0 <br>
+所以 Ry' 总是p的二次剩余 <br>
 
